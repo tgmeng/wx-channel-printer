@@ -1,6 +1,6 @@
 import {
-  Request,
-  Response,
+  RequestParams,
+  RequestResult,
   AppInfo,
   PrintOptions,
   PrintTaskResult,
@@ -11,11 +11,11 @@ import {
 export class WxChannelPrinter {
   url: string;
 
-  constructor({ url = "ws://127.0.0.1:12705" }: WxChannelPrinterOptions) {
+  constructor({ url = "ws://127.0.0.1:12705" }: WxChannelPrinterOptions = {}) {
     this.url = url;
   }
 
-  request<TReturn extends Response, TData extends Request = Request>(
+  request<TData extends RequestParams, TReturn extends RequestResult>(
     data: TData
   ): Promise<TReturn> {
     const requestID = Date.now();
@@ -27,7 +27,7 @@ export class WxChannelPrinter {
 
       ws.onmessage = e => {
         const resp = JSON.parse(e.data || "{}");
-        if (resp.requestId === requestID) {
+        if (resp.requestID === requestID) {
           resolve(resp);
         }
         ws.close();
@@ -42,7 +42,8 @@ export class WxChannelPrinter {
 
   getPrinterList(): Promise<PrinterData[]> {
     return this.request<
-      Response<{
+      RequestParams,
+      RequestResult<{
         printerList: PrinterData[];
       }>
     >({ command: "getPrinterList" }).then(data => {
@@ -52,7 +53,8 @@ export class WxChannelPrinter {
 
   getAppInfo(): Promise<AppInfo> {
     return this.request<
-      Response<{
+      RequestParams,
+      RequestResult<{
         appInfo: AppInfo;
       }>
     >({ command: "getAppInfo" }).then(data => {
@@ -61,9 +63,19 @@ export class WxChannelPrinter {
   }
 
   print(data: PrintOptions): Promise<PrintTaskResult[]> {
-    return this.request<Response<{ results: PrintTaskResult[] }>>({
-      ...data,
+    const { taskList, ...restData } = data;
+    let now = Date.now();
+    return this.request<
+      RequestParams<PrintOptions>,
+      RequestResult<{
+        results: PrintTaskResult[];
+      }>
+    >({
+      ...restData,
       command: "print",
+      taskList: taskList.map((task, index) => {
+        return { ...task, taskID: String(now + index) };
+      }),
     }).then(data => {
       return data.results;
     });

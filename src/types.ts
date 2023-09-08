@@ -6,11 +6,11 @@ export interface WxChannelPrinterOptions {
  * 通用
  */
 
-export type Request<T = unknown> = {
+export type RequestParams<T = unknown> = {
   command: string;
 } & T;
 
-export type Response<T = unknown> = {
+export type RequestResult<T = unknown> = {
   command: string;
   requestID: number;
 } & T;
@@ -35,8 +35,7 @@ export interface PrinterData {
 
 export interface PrintOptions {
   version: string;
-  requestID: string;
-  taskList: PrintTask[];
+  taskList: Array<PrintTask & { taskID?: string }>;
   printer: string;
 }
 

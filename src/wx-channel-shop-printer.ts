@@ -5,13 +5,13 @@ import {
   PrintOptions,
   PrintTaskResult,
   PrinterData,
-  WxChannelPrinterOptions,
+  WxChannelShopPrinterOptions,
 } from "./types";
 
-export class WxChannelPrinter {
+export class WxChannelShopPrinter {
   url: string;
 
-  constructor({ url = "ws://127.0.0.1:12705" }: WxChannelPrinterOptions = {}) {
+  constructor({ url = "ws://127.0.0.1:12705" }: WxChannelShopPrinterOptions = {}) {
     this.url = url;
   }
 

@@ -1,4 +1,4 @@
-export interface WxChannelPrinterOptions {
+export interface WxChannelShopPrinterOptions {
   url?: string;
 }
 

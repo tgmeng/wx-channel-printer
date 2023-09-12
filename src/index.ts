@@ -1,2 +1,2 @@
-export * from "./wx-channel-printer";
+export * from "./wx-channel-shop-printer";
 export * from "./types";

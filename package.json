@@ -1,17 +1,17 @@
 {
-  "name": "wx-channel-printer",
-  "version": "0.1.0-beta.1",
+  "name": "wx-channel-shop-printer",
+  "version": "0.1.0-beta.0",
   "type": "module",
   "files": [
     "dist"
   ],
-  "main": "./dist/wx-channel-printer.umd.js",
-  "module": "./dist/wx-channel-printer.es.js",
+  "main": "./dist/wx-channel-shop-printer.umd.js",
+  "module": "./dist/wx-channel-shop-printer.es.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/wx-channel-printer.es.js",
-      "require": "./dist/wx-channel-printer.umd.js"
+      "import": "./dist/wx-channel-shop-printer.es.js",
+      "require": "./dist/wx-channel-shop-printer.umd.js"
     }
   },
   "scripts": {

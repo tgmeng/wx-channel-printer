@@ -1,4 +1,4 @@
-# wx-channel-printer
+# wx-channel-shop-printer
 
 视频号小店 · 电子面单打印，简单封装 API。
 
@@ -7,9 +7,9 @@ https://developers.weixin.qq.com/doc/channels/API/ewaybill/connect_printer.html
 ## 使用
 
 ```ts
-import { WxChannelPrinter } from "wx-channel-printer";
+import { WxChannelShopPrinter } from "wx-channel-shop-printer";
 
-const printer = new WxChannelPrinter();
+const printer = new WxChannelShopPrinter();
 ```
 
 ### 获取打印机列表

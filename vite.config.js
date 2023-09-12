@@ -8,8 +8,8 @@ export default defineConfig({
   build: {
     lib: {
       entry: resolve(dirname(fileURLToPath(import.meta.url)), "src/index"),
-      name: "WxChannelPrinter",
-      fileName: "wx-channel-printer",
+      name: "WxChannelShopPrinter",
+      fileName: "wx-channel-shop-printer",
     },
     rollupOptions: {
       output: {},

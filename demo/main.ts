@@ -1,6 +1,6 @@
-import { WxChannelPrinter } from "../src/index";
+import { WxChannelShopPrinter } from "../src/index";
 
-const printer = new WxChannelPrinter();
+const printer = new WxChannelShopPrinter();
 
 printer.getPrinterList().then(list => {
   console.log(list);

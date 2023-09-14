@@ -15,6 +15,7 @@ export interface WxChannelShopPrinterBuffer<TData = object, TReturn = unknown> {
   reject: (err: unknown) => void;
   requestID: string;
   data: TData;
+  isSent: boolean;
 }
 
 export class WxChannelShopPrinter {
@@ -75,9 +76,12 @@ export class WxChannelShopPrinter {
 
   private sendBuffers() {
     this.bufferList.forEach(buffer => {
-      this.ws!.send(
-        JSON.stringify({ ...buffer.data, requestID: buffer.requestID })
-      );
+      if (!buffer.isSent) {
+        buffer.isSent = true;
+        this.ws!.send(
+          JSON.stringify({ ...buffer.data, requestID: buffer.requestID })
+        );
+      }
     });
   }
 
@@ -98,6 +102,7 @@ export class WxChannelShopPrinter {
         reject,
         requestID,
         data,
+        isSent: false,
       };
       this.bufferList.push(buffer as WxChannelShopPrinterBuffer);
 

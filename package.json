@@ -1,16 +1,16 @@
 {
   "name": "wx-channel-shop-printer",
-  "version": "0.1.0-beta.1",
+  "version": "0.1.0-beta.3",
   "type": "module",
   "files": [
     "dist"
   ],
   "main": "./dist/wx-channel-shop-printer.umd.js",
-  "module": "./dist/wx-channel-shop-printer.es.js",
+  "module": "./dist/wx-channel-shop-printer.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/wx-channel-shop-printer.es.js",
+      "import": "./dist/wx-channel-shop-printer.js",
       "require": "./dist/wx-channel-shop-printer.umd.js"
     }
   },
@@ -20,9 +20,12 @@
     "prepublishOnly": "yarn build"
   },
   "devDependencies": {
-    "typescript": "^4.4.4",
-    "vite": "^2.7.2",
+    "@lukeed/uuid": "^2.0.1",
+    "typescript": "^5.0.2",
+    "vite": "^4.4.5",
     "vite-plugin-dts": "^3.5.3",
-    "@lukeed/uuid": "^2.0.1"
+    "vue": "^3.3.4",
+    "vue-tsc": "^1.8.5",
+    "@vitejs/plugin-vue": "^4.3.4"
   }
 }

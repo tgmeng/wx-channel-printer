@@ -22,9 +22,7 @@
   "devDependencies": {
     "typescript": "^4.4.4",
     "vite": "^2.7.2",
-    "vite-plugin-dts": "^3.5.3"
-  },
-  "dependencies": {
+    "vite-plugin-dts": "^3.5.3",
     "@lukeed/uuid": "^2.0.1"
   }
 }

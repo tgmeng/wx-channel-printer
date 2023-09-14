@@ -12,7 +12,7 @@ export type RequestParams<T = unknown> = {
 
 export type RequestResult<T = unknown> = {
   command: string;
-  requestID: number;
+  requestID: string;
 } & T;
 
 /**
@@ -35,7 +35,10 @@ export interface PrinterData {
 
 export interface PrintOptions {
   version: string;
-  taskList: Array<PrintTask & { taskID?: string }>;
+  taskList: Array<{
+    printInfo: string;
+    printNum: PrintNum;
+  }>;
   printer: string;
 }
 

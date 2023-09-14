@@ -1,3 +1,4 @@
+import { v4 as uuid } from "@lukeed/uuid";
 import {
   RequestParams,
   RequestResult,
@@ -7,41 +8,119 @@ import {
   PrinterData,
   WxChannelShopPrinterOptions,
 } from "./types";
+import { makeConnectError, makeReadyStateError } from "./utils";
+
+export interface WxChannelShopPrinterBuffer<TData = object, TReturn = unknown> {
+  resolve: (data: TReturn) => void;
+  reject: (err: unknown) => void;
+  requestID: string;
+  data: TData;
+}
 
 export class WxChannelShopPrinter {
+  ws?: WebSocket;
   url: string;
 
-  constructor({ url = "ws://127.0.0.1:12705" }: WxChannelShopPrinterOptions = {}) {
+  taskId = 0;
+
+  bufferList: WxChannelShopPrinterBuffer[] = [];
+  disconnectTimerId = 0;
+
+  constructor({
+    url = "ws://127.0.0.1:12705",
+  }: WxChannelShopPrinterOptions = {}) {
     this.url = url;
   }
 
-  request<TData extends RequestParams, TReturn extends RequestResult>(
+  private connect() {
+    const ws = (this.ws = new WebSocket(this.url));
+
+    clearInterval(this.disconnectTimerId);
+    this.disconnectTimerId = setTimeout(() => {
+      if (this.ws) {
+        this.ws.close();
+      }
+    }, 1000 * 60 * 5);
+
+    return new Promise<void>((resolve, reject) => {
+      ws.addEventListener("open", () => {
+        this.sendBuffers();
+        resolve();
+      });
+
+      ws.addEventListener("message", e => {
+        const resp = JSON.parse(e.data || "{}");
+
+        const bufferIndex = this.bufferList.findIndex(
+          buffer => resp.requestID === buffer.requestID
+        );
+
+        if (bufferIndex !== -1) {
+          this.bufferList[bufferIndex].resolve(resp);
+          this.bufferList.splice(bufferIndex, 1);
+        }
+      });
+
+      ws.addEventListener("error", () => {
+        const error = makeConnectError();
+        reject(error);
+        this.throwBuffers(error);
+      });
+
+      ws.addEventListener("close", () => {
+        const error = makeReadyStateError(WebSocket.CLOSED);
+        reject(error);
+        this.throwBuffers(error);
+      });
+    });
+  }
+
+  private sendBuffers() {
+    this.bufferList.forEach(buffer => {
+      this.ws!.send(
+        JSON.stringify({ ...buffer.data, requestID: buffer.requestID })
+      );
+    });
+  }
+
+  private throwBuffers(error: Error) {
+    this.bufferList.forEach(buffer => {
+      buffer.reject(error);
+    });
+    this.bufferList.length = 0;
+  }
+
+  private send<TData extends RequestParams, TReturn extends RequestResult>(
     data: TData
   ): Promise<TReturn> {
-    const requestID = Date.now();
-    return new Promise((resolve, reject) => {
-      const ws = new WebSocket(this.url);
-      ws.onopen = () => {
-        ws.send(JSON.stringify({ ...data, requestID }));
+    const requestID = uuid();
+    return new Promise<TReturn>((resolve, reject) => {
+      const buffer: WxChannelShopPrinterBuffer<TData, TReturn> = {
+        resolve,
+        reject,
+        requestID,
+        data,
       };
+      this.bufferList.push(buffer as WxChannelShopPrinterBuffer);
 
-      ws.onmessage = e => {
-        const resp = JSON.parse(e.data || "{}");
-        if (resp.requestID === requestID) {
-          resolve(resp);
-        }
-        ws.close();
-      };
+      if (
+        !this.ws ||
+        this.ws.readyState === WebSocket.CLOSED ||
+        this.ws.readyState === WebSocket.CLOSING
+      ) {
+        this.connect();
+        return;
+      }
 
-      ws.onerror = e => {
-        reject(e);
-        ws.close();
-      };
+      if (this.ws.readyState === WebSocket.OPEN) {
+        this.sendBuffers();
+        return;
+      }
     });
   }
 
   getPrinterList(): Promise<PrinterData[]> {
-    return this.request<
+    return this.send<
       RequestParams,
       RequestResult<{
         printerList: PrinterData[];
@@ -52,7 +131,7 @@ export class WxChannelShopPrinter {
   }
 
   getAppInfo(): Promise<AppInfo> {
-    return this.request<
+    return this.send<
       RequestParams,
       RequestResult<{
         appInfo: AppInfo;
@@ -64,8 +143,7 @@ export class WxChannelShopPrinter {
 
   print(data: PrintOptions): Promise<PrintTaskResult[]> {
     const { taskList, ...restData } = data;
-    let now = Date.now();
-    return this.request<
+    return this.send<
       RequestParams<PrintOptions>,
       RequestResult<{
         results: PrintTaskResult[];
@@ -73,8 +151,8 @@ export class WxChannelShopPrinter {
     >({
       ...restData,
       command: "print",
-      taskList: taskList.map((task, index) => {
-        return { ...task, taskID: String(now + index) };
+      taskList: taskList.map(task => {
+        return { ...task, taskID: uuid() };
       }),
     }).then(data => {
       return data.results;

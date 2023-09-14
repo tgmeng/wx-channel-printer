@@ -9,3 +9,5 @@ printer.getPrinterList().then(list => {
 printer.getAppInfo().then(appInfo => {
   console.log(appInfo);
 });
+
+globalThis.printer = printer;

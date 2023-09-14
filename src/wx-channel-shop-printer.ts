@@ -37,9 +37,7 @@ export class WxChannelShopPrinter {
 
     clearInterval(this.disconnectTimerId);
     this.disconnectTimerId = setTimeout(() => {
-      if (this.ws) {
-        this.ws.close();
-      }
+      this.disconnect();
     }, 1000 * 60 * 5);
 
     return new Promise<void>((resolve, reject) => {
@@ -117,6 +115,12 @@ export class WxChannelShopPrinter {
         return;
       }
     });
+  }
+
+  disconnect() {
+    if (this.ws) {
+      this.ws.close();
+    }
   }
 
   getPrinterList(): Promise<PrinterData[]> {
